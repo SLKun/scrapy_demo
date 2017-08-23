@@ -9,11 +9,6 @@ class ProblemSpider(scrapy.Spider):
         for url in urls:
             yield scrapy.Request(url, self.login)
 
-    def main_requests(self):
-        urls = ['https://redmine.csdc.info/redmine/projects/smdb/issues']
-        for url in urls:
-            return scrapy.Request(url, self.parse)
-
     def login(self, response):
         param = {
             'username': self.username,
@@ -33,14 +28,20 @@ class ProblemSpider(scrapy.Spider):
         else:
             yield self.main_requests()
 
+    def main_requests(self):
+        urls = ['https://redmine.csdc.info/redmine/projects/smdb/issues']
+        for url in urls:
+            return scrapy.Request(url, self.parse)
+
     def parse(self, response):
         table = response.xpath('//table[thead][tbody]');
+        table_content = []
         # parse table head
         table_head = []
         for head in table.xpath('./thead/tr[1]/th'):
             table_head.append(head.xpath('./a/text()').extract_first())
-        print(table_head)
-        table_content = []
+        table_content.append(table_head)
+        # parse table body
         for line in table.xpath('./tbody/tr'):
             item_content = []
             for item in line.xpath('./td'):
@@ -55,6 +56,30 @@ class ProblemSpider(scrapy.Spider):
                         item_content.append(progress)
                 else:
                     item_content.append(item.xpath('./text()').extract_first())
+            yield self.issue_request(item_content[1], item_content)
             table_content.append(item_content)
-            print(item_content)
+        print(table_content)
+        return None
+
+    def issue_request(self, issue_id, item_content):
+        url = 'https://redmine.csdc.info/redmine/issues/' + issue_id
+        request = scrapy.Request(url, self.issues_parse)
+        request.meta["item_content"] = item_content
+        return request
+
+    def issues_parse(self, response):
+        item_content = response.meta['item_content']
+        description = response.xpath('//div[@class="wiki"][p]/p/text()').extract_first()
+        for change in response.xpath('//div[@id="history"][div]/div[div[contains(@id, "journal")]]'):
+            change_id = change.xpath('./@id').re(r'change-([0-9]+)')[0]
+            change_person = change.xpath('./h4/a[3]/text()').extract_first()
+            change_date = change.xpath('./h4/a[4]/@title').extract_first()
+            change_content = change.xpath('./div[contains(@id, "journal")]/p/text()').extract_first()
+            change = {}
+            change['id'] = change_id
+            change['person'] = change_person
+            change['date'] = change_date
+            change['content'] = change_content
+            print(change)
+        item_content.append(description)
         return None
