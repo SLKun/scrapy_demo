@@ -1,4 +1,5 @@
 import scrapy
+import helper.IterHelper
 
 class ProblemSpider(scrapy.Spider):
     name = "problem"
@@ -67,6 +68,7 @@ class ProblemSpider(scrapy.Spider):
             yield self.issue_request(item_content[1], item_content)
             table_content.append(item_content)
         print(table_content)
+        helper.IterHelper.print_beauty(table_content)
         return None
 
     def issue_request(self, issue_id, item_content):
