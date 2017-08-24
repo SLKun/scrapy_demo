@@ -1,6 +1,7 @@
 global_indent = 0
 indent_str = "    "
 
+
 def fetch_string_str(str0):
     return "'" + str0 + "'"
 
