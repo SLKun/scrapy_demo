@@ -1,12 +1,15 @@
 import scrapy
 
-
 class ProblemSpider(scrapy.Spider):
     name = "problem"
 
     def start_requests(self):
-        urls = ['https://redmine.csdc.info/redmine/login']
-        for url in urls:
+        # prefer using cookie rather than login again
+        if hasattr(self, "cookie"):
+            url = 'https://redmine.csdc.info/redmine'
+            yield scrapy.Request(url, self.check_login, cookies={'_redmine_session': self.cookie})
+        elif hasattr(self, "username") and hasattr(self, "password"):
+            url = 'https://redmine.csdc.info/redmine/login'
             yield scrapy.Request(url, self.login)
 
     def login(self, response):
@@ -24,7 +27,10 @@ class ProblemSpider(scrapy.Spider):
         # fail to login
         if 'login' in response.url:
             print(response.status, response.url)
-            print(response.xpath('//div[@id="flash_error"]/text()').extract_first())
+            if response.xpath('//div[@id="flash_error"]/text()').extract_first():
+                print(response.xpath('//div[@id="flash_error"]/text()').extract_first())
+            else:
+                print("Invalid Cookie. Try to login with username and Password.")
         else:
             yield self.main_requests()
 
@@ -49,10 +55,12 @@ class ProblemSpider(scrapy.Spider):
                     item_content.append(item.xpath('./a/text()').extract_first())
                 elif item.xpath('./table'):
                     if item.xpath('./table/tr/td[@class="closed"]'):
-                        progress = int(item.xpath('./table/tr/td[@class="closed"]/@style').re(r'.*width: ([0-9]+)%.*')[0])
+                        progress = int(
+                            item.xpath('./table/tr/td[@class="closed"]/@style').re(r'.*width: ([0-9]+)%.*')[0])
                         item_content.append(progress)
                     else:
-                        progress = 100 - int(item.xpath('./table/tr/td[@class="todo"]/@style').re(r'.*width: ([0-9]+)%.*')[0])
+                        progress = 100 - int(
+                            item.xpath('./table/tr/td[@class="todo"]/@style').re(r'.*width: ([0-9]+)%.*')[0])
                         item_content.append(progress)
                 else:
                     item_content.append(item.xpath('./text()').extract_first())
