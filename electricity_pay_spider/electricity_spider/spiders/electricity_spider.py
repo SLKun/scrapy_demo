@@ -1,5 +1,4 @@
 import scrapy
-import win10toast
 import helper.IterHelper
 
 
@@ -16,6 +15,8 @@ class ElectricitySpider(scrapy.Spider):
             # prepare signed in
             url = 'https://redmine.csdc.info/redmine/login'
             yield scrapy.Request(url, self.login)
+        else:
+            print("Error")
 
     def login(self, response):
         param = {
