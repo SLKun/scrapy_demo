@@ -3,7 +3,7 @@ import helper.IterHelper
 
 
 class ElectricitySpider(scrapy.Spider):
-    name = "problem"
+    name = "electricity"
 
     def start_requests(self):
         # prefer using cookie rather than login again
