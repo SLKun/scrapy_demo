@@ -7,7 +7,7 @@ from scrapy.crawler import CrawlerProcess
 
 def main(arg):
     process = CrawlerProcess({
-        'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
+        'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36',
         'LOG_LEVEL': logging.WARNING
     })
     process.crawl(ElectricitySpider, **arg)
@@ -15,7 +15,7 @@ def main(arg):
 
 
 if __name__ == '__main__':
-    arg = {'cookie': 'BAh7CCIMdXNlcl9pZGk7Ig9zZXNzaW9uX2lkIiU1NWU0YWI3MDE1OTZhMDgwMzBmNzVjODJjNTA3NzEyNiIQX2NzcmZfdG9rZW4iMTEvVElyRWxRWi9Tb25ScURaUThIYWVTSURXOWxWNVBuVzFaNmFuS0YyUHc9--c8b2eb677f716add656a6ec0e532d55f1848efc1'}
+    arg = {'cookie': 'test-cookie'}
     main(arg)
 
 # cmdline of main

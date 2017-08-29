@@ -59,12 +59,16 @@ class ElectricitySpider(scrapy.Spider):
         print("Options: " + ",".join(options))
 
         self.update_data(response)
-        self.data['__EVENTTARGET'] = 'txtld'
+        self.data['__EVENTTARGET'] = ''
         self.data['txtld'] = '4层'
         self.data['Txtroom'] = '401'
+        self.data['ImageButton1.x'] = '15'
+        self.data['ImageButton1.y'] = '15'
         yield scrapy.FormRequest(self.url, formdata=self.data, callback=self.fetch_result)
 
     def fetch_result(self, response):
-        for option in response.xpath('//select[@id="txtyq"]/option'):
-            if not "-1" in option.xpath('./@value').extract_first():
-                print(option.xpath('./@value').extract_first())
+        result = {}
+        for option in response.xpath('//table[@id="GridView2"]/tr[td]'):
+            time = option.xpath('./td[2]/text()').re(r'20([0-9-]*) .*')[0]
+            data = option.xpath('./td[1]/text()').extract_first()
+            print(time + ": " + data)
