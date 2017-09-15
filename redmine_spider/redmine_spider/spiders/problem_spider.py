@@ -1,15 +1,18 @@
 import scrapy
 import helper.IterHelper
 
+
 class ProblemSpider(scrapy.Spider):
     name = "problem"
 
     def start_requests(self):
         # prefer using cookie rather than login again
         if hasattr(self, "cookie"):
+            # signed in
             url = 'https://redmine.csdc.info/redmine'
             yield scrapy.Request(url, self.check_login, cookies={'_redmine_session': self.cookie})
         elif hasattr(self, "username") and hasattr(self, "password"):
+            # prepare signed in
             url = 'https://redmine.csdc.info/redmine/login'
             yield scrapy.Request(url, self.login)
 
@@ -26,12 +29,14 @@ class ProblemSpider(scrapy.Spider):
 
     def check_login(self, response):
         # fail to login
-        if 'login' in response.url:
+        if 'login' in response.url: # dummy way to estimate
             print(response.status, response.url)
             if response.xpath('//div[@id="flash_error"]/text()').extract_first():
                 print(response.xpath('//div[@id="flash_error"]/text()').extract_first())
             else:
                 print("Invalid Cookie. Try to login with username and Password.")
+                url = 'https://redmine.csdc.info/redmine/login'
+                yield scrapy.Request(url, self.login)
         else:
             yield self.main_requests()
 
