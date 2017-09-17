@@ -17,24 +17,29 @@ def merge(A, B):
     AandB = {}
     AexB = {}
     BexA = {}
+    result = {}
     error = {}
 
-    for key in A_dict.keys():
-        if key in B_dict:
-            if A_dict[key] in B_dict[key] or B_dict[key] in A_dict[key]:
-                AandB[key] = A_dict[key]
+    for key in A.keys():
+        if key in B:
+            if A[key] in B[key] or B[key] in A[key]:
+                AandB[key] = A[key]
+                result[key] = A[key]
             else:
-                error[key] = {A_dict[key], B_dict[key]}
-            B_dict.pop(key)
+                error[key] = {A[key], B[key]}
+                result[key] = A[key]
+            B.pop(key)
         else:
-            AexB[key] = A_dict[key]
+            AexB[key] = A[key]
+            result[key] = A[key]
 
-    for key in B_dict.keys():
-        BexA[key] = B_dict[key]
+    for key in B.keys():
+        BexA[key] = B[key]
+        result[key] = B[key]
 
-    print(len(A_json), len(B_json))
     print(len(AandB), len(error))
     print(len(AexB), len(BexA))
+    print(len(result))
 
     return [result, error]
 
@@ -52,14 +57,18 @@ def main():
 
     A = open(params['A_filename']).read()
     B = open(params['B_filename']).read()
-    result = open(params_list['result_filename'], "a")
-    error = open(params_list['error_filename'], "a")
+    result = open(params['result_filename'], "a")
+    error = open(params['error_filename'], "a")
     A_json = json.loads(A)
     B_json = json.loads(B)
     A_dict = tran_list_to_dict(A_json)
     B_dict = tran_list_to_dict(B_json)
-    
+    print(len(A_dict), len(B_dict))
+    [result_dict, error_dict] = merge(A_dict, B_dict)
 
+    result.write(json.dumps(result_dict, ensure_ascii=False))
+    # error.write(json.dumps(error_dict))
+    print_items(error_dict)
 
 if __name__ == '__main__':
     main()
