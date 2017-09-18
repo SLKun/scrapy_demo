@@ -43,7 +43,6 @@ def merge(A, B):
 
     return [result, error]
 
-
 def main():
     params_list = ["A_filename", "B_filename", "result_filename", "error_filename"]
     params = {
@@ -61,8 +60,10 @@ def main():
     error = open(params['error_filename'], "a")
     A_json = json.loads(A)
     B_json = json.loads(B)
-    A_dict = tran_list_to_dict(A_json)
-    B_dict = tran_list_to_dict(B_json)
+    # A_dict = tran_list_to_dict(A_json)
+    # B_dict = tran_list_to_dict(B_json)
+    A_dict = A_json
+    B_dict = B_json
     print(len(A_dict), len(B_dict))
     [result_dict, error_dict] = merge(A_dict, B_dict)
 
