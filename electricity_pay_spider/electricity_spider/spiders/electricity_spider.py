@@ -8,7 +8,7 @@ class ElectricitySpider(scrapy.Spider):
     def fetch_option(self, response):
         # check selected options
         option_list = []
-        levels = {0: 'programId', 1: 'txtyq', 2: 'txtld', 3: ''}
+        levels = {0: 'programId', 1: 'txtyq'}
         for level in levels.values():
             xpath_str = '//select[@id="' + level + '"]/option[@selected]/@value'
             result = response.xpath(xpath_str).extract_first()
@@ -17,21 +17,22 @@ class ElectricitySpider(scrapy.Spider):
 
         # decide the level of options to print
         options = []
-        for option in response.xpath('//select[@id="' + levels[len(option_list)] + '"]/option'):
-            option_val = option.xpath('./@value').extract_first()
-            if "-1" not in option_val:
-                options.append(option_val)
+        if len(option_list) < len(levels):
+            for option in response.xpath('//select[@id="' + levels[len(option_list)] + '"]/option'):
+                option_val = option.xpath('./@value').extract_first()
+                if "-1" not in option_val:
+                    options.append(option_val)
 
-        # print options
-        print("_".join(option_list) + " Options: " + ",".join(options))
-        return options
+            # print options
+            print("_".join(option_list) + " Options: " + ",".join(options))
+            return options
 
     def fetch_data(self, response):
         data = {}
 
         # Data from input area
         input_list = ['__EVENTTARGET', '__EVENTARGUMENT', '__LASTFOCUS', '__VIEWSTATE', '__EVENTVALIDATION', 'Txtroom',
-                      'TextBox2', 'TextBox3']
+                      'Txtroom', 'TextBox2', 'TextBox3']
         for input in input_list:
             input_xpath = '//input[@name="' + input + '"]/@value'
             result = response.xpath(input_xpath).extract_first()
@@ -41,7 +42,7 @@ class ElectricitySpider(scrapy.Spider):
                 data[input] = ''
 
         # Data from select area
-        select_list = ['programId', 'txtyq', 'txtld']
+        select_list = ['programId', 'txtyq']
         for select in select_list:
             select_xpath = '//select[@id="' + select + '"]/option[@selected]/@value'
             result = response.xpath(select_xpath).extract_first()
@@ -49,7 +50,7 @@ class ElectricitySpider(scrapy.Spider):
                 data[select] = result
 
         # Fixed Data
-        data['ImageButton1.x'] = '15'
+        data['ImageButton1.x'] = '31'
         data['ImageButton1.y'] = '15'
         return data
 
@@ -57,15 +58,14 @@ class ElectricitySpider(scrapy.Spider):
         self.url = "http://202.114.18.218/main.aspx"
         self.param = {
             'programId': "东区",
-            'txtyq': "南一舍",
-            'txtld': "1层",
-            'Txtroom': "123",
+            'txtyq': "南1舍",
+            'Txtroom': "233",
         }
         yield scrapy.Request(self.url, callback=self.choose_requests)
 
     def choose_requests(self, response):
         data = self.fetch_data(response)
-        levels = ['programId', 'txtyq', 'txtld']
+        levels = ['programId', 'txtyq']
         for level in levels:
             if level not in data.keys():
                 data[level] = self.param[level]
